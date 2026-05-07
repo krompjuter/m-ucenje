@@ -15,12 +15,15 @@ body {
 }
 
 .app {
-  max-width: 800px;
+  max-width: 980px;
   margin: 0 auto;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 25px 80px rgba(0,0,0,0.4);
   overflow: hidden;
+  min-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Header ─── */
@@ -76,7 +79,7 @@ body {
 .tab-btn.test-tab.active { color: #e53e3e; border-bottom-color: #e53e3e; }
 
 /* ─── Content ─── */
-.content { padding: 20px 22px 26px; }
+.content { padding: 24px 28px 40px; flex: 1; }
 .section { display: none; }
 .section.active { display: block; }
 
@@ -312,6 +315,17 @@ body {
 .rv-err-val { color: #742a2a; }
 .rv-skip-val { color: #a0aec0; }
 
+/* ─── Level selector ─── */
+.level-selector { display:flex; gap:6px; justify-content:center; margin-top:10px; }
+.lvl-btn {
+  padding: 5px 16px; border: 2px solid rgba(255,255,255,0.35);
+  border-radius: 20px; background: rgba(255,255,255,0.1);
+  color: white; font-size: 0.82em; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+}
+.lvl-btn:hover  { background: rgba(255,255,255,0.22); }
+.lvl-btn.active { background: rgba(255,255,255,0.28); border-color: white; }
+
 /* ─── Gift quote ─── */
 .gift-card {
   background: linear-gradient(135deg, #fffbeb, #fefcbf);
@@ -340,6 +354,11 @@ body {
     <h1>🧮 Matematika za V razred</h1>
     <p>Razlomci &nbsp;·&nbsp; Jednačine &nbsp;·&nbsp; Nejednačine</p>
     <p id="header-quote" style="margin-top:10px;font-size:0.72em;opacity:0.82;font-style:italic;line-height:1.5;max-width:580px;margin-left:auto;margin-right:auto;"></p>
+    <div class="level-selector">
+      <button class="lvl-btn" onclick="setLevel(this,'easy')">🟢 Lako</button>
+      <button class="lvl-btn active" onclick="setLevel(this,'medium')">🟡 Srednje</button>
+      <button class="lvl-btn" onclick="setLevel(this,'hard')">🔴 Teško</button>
+    </div>
     <div class="global-score">
       <div><span id="g-ok">0</span>✅ Tačno</div>
       <div><span id="g-wr">0</span>❌ Netačno</div>
@@ -359,10 +378,6 @@ body {
 
     <!-- ===== RAZLOMCI ===== -->
     <div id="razlomci" class="section active">
-      <div class="mini-scores">
-        <div class="score-card c"><div class="num" id="r-ok">0</div><div class="lbl">Tačno</div></div>
-        <div class="score-card w"><div class="num" id="r-wr">0</div><div class="lbl">Netačno</div></div>
-      </div>
       <div class="pills" id="r-pills">
         <button class="pill active" onclick="rTopic(this,'sabiranje')">➕ Sabiranje</button>
         <button class="pill" onclick="rTopic(this,'oduzimanje')">➖ Oduzimanje</button>
@@ -377,17 +392,13 @@ body {
         <div class="feedback" id="r-fb"></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-check" onclick="rCheck()">Proveri ✓</button>
+        <button class="btn btn-check" id="r-check-btn" onclick="rCheck()">Proveri ✓</button>
         <button class="btn btn-new" onclick="rNew()">Novi zadatak 🔄</button>
       </div>
     </div>
 
     <!-- ===== JEDNAČINE ===== -->
     <div id="jednacine" class="section">
-      <div class="mini-scores">
-        <div class="score-card c"><div class="num" id="j-ok">0</div><div class="lbl">Tačno</div></div>
-        <div class="score-card w"><div class="num" id="j-wr">0</div><div class="lbl">Netačno</div></div>
-      </div>
       <div class="pills" id="j-pills">
         <button class="pill active" onclick="jType(this,'plus')">x + a = b</button>
         <button class="pill" onclick="jType(this,'minus')">x − a = b</button>
@@ -405,17 +416,13 @@ body {
         <div class="feedback" id="j-fb"></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-check" onclick="jCheck()">Proveri ✓</button>
+        <button class="btn btn-check" id="j-check-btn" onclick="jCheck()">Proveri ✓</button>
         <button class="btn btn-new" onclick="jNew()">Novi zadatak 🔄</button>
       </div>
     </div>
 
     <!-- ===== NEJEDNAČINE ===== -->
     <div id="nejednacine" class="section">
-      <div class="mini-scores">
-        <div class="score-card c"><div class="num" id="n-ok">0</div><div class="lbl">Tačno</div></div>
-        <div class="score-card w"><div class="num" id="n-wr">0</div><div class="lbl">Netačno</div></div>
-      </div>
       <div class="pills" id="n-pills">
         <button class="pill active" onclick="nType(this,'plus')">x + a ○ b</button>
         <button class="pill" onclick="nType(this,'minus')">x − a ○ b</button>
@@ -440,7 +447,7 @@ body {
         <div class="feedback" id="n-fb"></div>
       </div>
       <div class="btn-row">
-        <button class="btn btn-check" onclick="nCheck()">Proveri ✓</button>
+        <button class="btn btn-check" id="n-check-btn" onclick="nCheck()">Proveri ✓</button>
         <button class="btn btn-new" onclick="nNew()">Novi zadatak 🔄</button>
       </div>
     </div>
@@ -581,6 +588,32 @@ const T = {
 
 const SIGNS = ['>', '<', '≥', '≤'];
 
+let LEVEL = 'medium';
+const LEVEL_CFG = {
+  easy: {
+    r: { dMax: 6,  sameDen: true,  topics: ['sabiranje','oduzimanje','skracivanje','uporedjivanje'] },
+    j: { xMax: 8,  aMax: 6,  types: ['plus','minus','times'] },
+    n: { numMax: 12, signs: ['>','<'], types: ['plus','minus'] }
+  },
+  medium: {
+    r: { dMax: 10, sameDen: null,  topics: ['sabiranje','oduzimanje','mnozenje','deljenje','uporedjivanje','skracivanje'] },
+    j: { xMax: 15, aMax: 15, types: ['plus','minus','times','div','combo'] },
+    n: { numMax: 20, signs: ['>','<','≥','≤'], types: ['plus','minus','times','combo'] }
+  },
+  hard: {
+    r: { dMax: 15, sameDen: false, topics: ['sabiranje','oduzimanje','mnozenje','deljenje','uporedjivanje','skracivanje'] },
+    j: { xMax: 30, aMax: 25, types: ['times','div','combo'] },
+    n: { numMax: 40, signs: ['>','<','≥','≤'], types: ['times','combo'] }
+  }
+};
+
+function setLevel(btn, level) {
+  LEVEL = level;
+  document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rNew(); jNew(); nNew();
+}
+
 // ============================================================
 // Utilities
 // ============================================================
@@ -636,97 +669,94 @@ function clearFb(id) { document.getElementById(id).className = 'feedback'; }
 // QUESTION GENERATORS  (shared by practice + test)
 // ============================================================
 function genRQ(topic) {
-  if (!topic) {
-    const all = ['sabiranje','oduzimanje','mnozenje','deljenje','uporedjivanje','skracivanje'];
-    topic = all[ri(0, all.length - 1)];
-  }
+  const cfg  = LEVEL_CFG[LEVEL].r;
+  const dMax = cfg.dMax;
+  if (!topic) topic = cfg.topics[ri(0, cfg.topics.length - 1)];
 
   let prob = '', ans = null;
 
   for (let attempt = 0; attempt < 40; attempt++) {
     if (topic === 'sabiranje') {
-      if (Math.random() < 0.5) {
-        const d = ri(2, 12), n1 = ri(1, d - 1), n2 = ri(1, Math.max(1, d - n1));
-        ans = simplify(n1 + n2, d);
-        prob = `${fHtml(n1, d)} + ${fHtml(n2, d)} = ?`;
+      const same = cfg.sameDen === true ? true : cfg.sameDen === false ? false : Math.random() < 0.5;
+      if (same) {
+        const d = ri(2, dMax), n1 = ri(1, d-1), n2 = ri(1, Math.max(1, d-n1));
+        ans = simplify(n1+n2, d);
+        prob = `${fHtml(n1,d)} + ${fHtml(n2,d)} = ?`;
       } else {
-        const d1 = ri(2, 8), d2 = ri(2, 8), n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
-        const L = lcm(d1, d2);
-        ans = simplify(n1 * (L / d1) + n2 * (L / d2), L);
-        prob = `${fHtml(n1, d1)} + ${fHtml(n2, d2)} = ?`;
+        const d1=ri(2,dMax), d2=ri(2,dMax), n1=ri(1,d1-1), n2=ri(1,d2-1);
+        const L = lcm(d1,d2);
+        ans = simplify(n1*(L/d1)+n2*(L/d2), L);
+        prob = `${fHtml(n1,d1)} + ${fHtml(n2,d2)} = ?`;
       }
       break;
 
     } else if (topic === 'oduzimanje') {
-      if (Math.random() < 0.5) {
-        const d = ri(2, 12), n2 = ri(1, d - 2), n1 = ri(n2 + 1, d - 1);
-        ans = simplify(n1 - n2, d);
-        prob = `${fHtml(n1, d)} − ${fHtml(n2, d)} = ?`;
+      const same = cfg.sameDen === true ? true : cfg.sameDen === false ? false : Math.random() < 0.5;
+      if (same) {
+        const d=ri(2,dMax), n2=ri(1,d-2), n1=ri(n2+1,d-1);
+        ans = simplify(n1-n2, d);
+        prob = `${fHtml(n1,d)} − ${fHtml(n2,d)} = ?`;
         break;
       } else {
-        const d1 = ri(2, 8), d2 = ri(2, 8), n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
-        const L = lcm(d1, d2);
-        const rn = n1 * (L / d1) - n2 * (L / d2);
-        if (rn > 0) { ans = simplify(rn, L); prob = `${fHtml(n1, d1)} − ${fHtml(n2, d2)} = ?`; break; }
+        const d1=ri(2,dMax), d2=ri(2,dMax), n1=ri(1,d1-1), n2=ri(1,d2-1);
+        const L = lcm(d1,d2);
+        const rn = n1*(L/d1)-n2*(L/d2);
+        if (rn > 0) { ans = simplify(rn,L); prob = `${fHtml(n1,d1)} − ${fHtml(n2,d2)} = ?`; break; }
       }
 
     } else if (topic === 'mnozenje') {
-      const n1 = ri(1, 5), d1 = ri(2, 7), n2 = ri(1, 5), d2 = ri(2, 7);
-      ans = simplify(n1 * n2, d1 * d2);
-      prob = `${fHtml(n1, d1)} · ${fHtml(n2, d2)} = ?`;
+      const cap = Math.min(dMax, 7);
+      const n1=ri(1,5), d1=ri(2,cap), n2=ri(1,5), d2=ri(2,cap);
+      ans = simplify(n1*n2, d1*d2);
+      prob = `${fHtml(n1,d1)} · ${fHtml(n2,d2)} = ?`;
       break;
 
     } else if (topic === 'deljenje') {
-      const n1 = ri(1, 5), d1 = ri(2, 7), n2 = ri(1, 5), d2 = ri(2, 7);
-      ans = simplify(n1 * d2, d1 * n2);
-      prob = `${fHtml(n1, d1)} ÷ ${fHtml(n2, d2)} = ?`;
+      const cap = Math.min(dMax, 7);
+      const n1=ri(1,5), d1=ri(2,cap), n2=ri(1,5), d2=ri(2,cap);
+      ans = simplify(n1*d2, d1*n2);
+      prob = `${fHtml(n1,d1)} ÷ ${fHtml(n2,d2)} = ?`;
       break;
 
     } else if (topic === 'uporedjivanje') {
-      const d1 = ri(2, 9), n1 = ri(1, d1 - 1), d2 = ri(2, 9), n2 = ri(1, d2 - 1);
-      const diff = n1 / d1 - n2 / d2;
+      const d1=ri(2,dMax), n1=ri(1,d1-1), d2=ri(2,dMax), n2=ri(1,d2-1);
+      const diff = n1/d1 - n2/d2;
       const sign = diff > 0.0001 ? '>' : diff < -0.0001 ? '<' : '=';
       ans = { fsign: true, value: sign };
-      prob = `${fHtml(n1, d1)} &nbsp;?&nbsp; ${fHtml(n2, d2)}`;
+      prob = `${fHtml(n1,d1)} &nbsp;?&nbsp; ${fHtml(n2,d2)}`;
       break;
 
     } else if (topic === 'skracivanje') {
-      const g = ri(2, 6);
-      let n = ri(2, 7) * g, d = ri(2, 7) * g;
-      while (n === d) d = ri(2, 7) * g;
+      const gMax = LEVEL === 'hard' ? 8 : LEVEL === 'easy' ? 4 : 6;
+      const g = ri(2, gMax);
+      let n = ri(2,6)*g, d = ri(2,6)*g;
+      while (n === d) d = ri(2,6)*g;
       ans = simplify(n, d);
-      prob = `Skrati razlomak: ${fHtml(n, d)} = ?`;
+      prob = `Skrati razlomak: ${fHtml(n,d)} = ?`;
       break;
     }
   }
 
   if (!ans) ans = simplify(1, 2);
-
-  return {
-    areaName: 'Razlomci', topic,
-    probHtml: prob,
-    ansType:  ans.fsign ? 'fsign' : 'frac',
-    ans
-  };
+  return { areaName: 'Razlomci', topic, probHtml: prob, ansType: ans.fsign ? 'fsign' : 'frac', ans };
 }
 
 function genJQ(type) {
-  if (!type) {
-    const all = ['plus','minus','times','div','combo'];
-    type = all[ri(0, all.length - 1)];
-  }
+  const cfg  = LEVEL_CFG[LEVEL].j;
+  const xMax = cfg.xMax, aMax = cfg.aMax;
+  if (!type) type = cfg.types[ri(0, cfg.types.length - 1)];
   let prob = '', ans = 0;
 
   for (let attempt = 0; attempt < 20; attempt++) {
-    if (type === 'plus')  { const x = ri(1,25), a = ri(1,20);          ans=x; prob=`x + ${a} = ${x+a}`;      break; }
-    if (type === 'minus') { const x = ri(2,25), a = ri(1,x-1);         ans=x; prob=`x − ${a} = ${x-a}`;      break; }
-    if (type === 'times') { const a = ri(2,12), x = ri(1,15);           ans=x; prob=`${a} · x = ${a*x}`;      break; }
-    if (type === 'div')   { const a = ri(2,10), x = ri(1,8)*a;          ans=x; prob=`x ÷ ${a} = ${x/a}`;      break; }
+    if (type === 'plus')  { const x=ri(1,xMax), a=ri(1,aMax);                    ans=x; prob=`x + ${a} = ${x+a}`;      break; }
+    if (type === 'minus') { const x=ri(2,xMax), a=ri(1,Math.min(x-1,aMax));       ans=x; prob=`x − ${a} = ${x-a}`;      break; }
+    if (type === 'times') { const a=ri(2,Math.min(aMax,12)), x=ri(1,xMax);         ans=x; prob=`${a} · x = ${a*x}`;      break; }
+    if (type === 'div')   { const a=ri(2,10), x=ri(1,Math.max(1,Math.floor(xMax/a)))*a; ans=x; prob=`x ÷ ${a} = ${x/a}`; break; }
     if (type === 'combo') {
       const ch = ri(1,4);
-      if (ch===1) { const a=ri(2,5),x=ri(1,12),b=ri(1,15);             ans=x; prob=`${a}·x + ${b} = ${a*x+b}`; break; }
-      if (ch===2) { const a=ri(2,5),x=ri(2,12),b=ri(1,10);             ans=x; prob=`${a}·x − ${b} = ${a*x-b}`; break; }
-      if (ch===3) { const a=ri(2,6),x=ri(1,5)*a,b=ri(1,10);            ans=x; prob=`x ÷ ${a} + ${b} = ${x/a+b}`; break; }
+      if (ch===1) { const a=ri(2,5),x=ri(1,xMax),b=ri(1,aMax);  ans=x; prob=`${a}·x + ${b} = ${a*x+b}`; break; }
+      if (ch===2) { const a=ri(2,5),x=ri(2,xMax),b=ri(1,10);    ans=x; prob=`${a}·x − ${b} = ${a*x-b}`; break; }
+      if (ch===3) { const a=ri(2,6),x=ri(1,5)*a,b=ri(1,10);     ans=x; prob=`x ÷ ${a} + ${b} = ${x/a+b}`; break; }
       const a=ri(2,6),x=ri(3,7)*a,b=ri(1,5),c=x/a-b;
       if (c>0) { ans=x; prob=`x ÷ ${a} − ${b} = ${c}`; break; }
     }
@@ -736,17 +766,17 @@ function genJQ(type) {
 }
 
 function genNQ(type) {
-  if (!type) {
-    const all = ['plus','minus','times','combo'];
-    type = all[ri(0, all.length - 1)];
-  }
-  const sign = SIGNS[ri(0, 3)];
+  const cfg  = LEVEL_CFG[LEVEL].n;
+  const nMax = cfg.numMax;
+  const signs = cfg.signs;
+  if (!type) type = cfg.types[ri(0, cfg.types.length - 1)];
+  const sign = signs[ri(0, signs.length - 1)];
   let prob = '', val = 0;
 
-  if (type === 'plus')  { const a=ri(1,15),b=ri(a+2,a+25); val=b-a; prob=`x + ${a} ${sign} ${b}`; }
-  if (type === 'minus') { const a=ri(1,12),b=ri(1,20);     val=b+a; prob=`x − ${a} ${sign} ${b}`; }
-  if (type === 'times') { const a=ri(2,8), xv=ri(1,10);    val=xv;  prob=`${a}·x ${sign} ${a*xv}`; }
-  if (type === 'combo') { const a=ri(2,5),b=ri(1,10),xv=ri(1,10); val=xv; prob=`${a}·x + ${b} ${sign} ${a*xv+b}`; }
+  if (type === 'plus')  { const a=ri(1,Math.min(nMax/2,15)), b=ri(a+2,a+nMax); val=b-a; prob=`x + ${a} ${sign} ${b}`; }
+  if (type === 'minus') { const a=ri(1,12), b=ri(1,nMax);                       val=b+a; prob=`x − ${a} ${sign} ${b}`; }
+  if (type === 'times') { const a=ri(2,8),  xv=ri(1,Math.min(10,nMax));         val=xv;  prob=`${a}·x ${sign} ${a*xv}`; }
+  if (type === 'combo') { const a=ri(2,5),b=ri(1,10),xv=ri(1,Math.min(10,nMax)); val=xv; prob=`${a}·x + ${b} ${sign} ${a*xv+b}`; }
 
   return { areaName: 'Nejednačine', type, probHtml: prob, ansType: 'signum', ans: { sign, val } };
 }
@@ -762,6 +792,7 @@ function rTopic(btn, topic) {
 }
 function rNew() {
   clearFb('r-fb');
+  document.getElementById('r-check-btn').disabled = false;
   const q = genRQ(S.r.topic);
   S.r.ans = q.ans;
   document.getElementById('r-prob').innerHTML = q.probHtml;
@@ -803,8 +834,14 @@ function rCheck() {
     correct = s.n === ans.n && s.d === ans.d;
     expl = ans.d === 1 ? `Tačan odgovor: ${ans.n}` : `Tačan odgovor: ${ans.n}/${ans.d}`;
   }
-  if (correct) { S.r.ok++; S.ok++; document.getElementById('r-ok').textContent = S.r.ok; fb('r-fb', true, '🎉 Odlično! Tačno!'); }
-  else         { S.r.wr++; S.wr++; document.getElementById('r-wr').textContent = S.r.wr; fb('r-fb', false, '❌ Nije tačno. ' + expl); }
+  if (correct) {
+    S.r.ok++; S.ok++;
+    fb('r-fb', true, '🎉 Odlično! Tačno!');
+    document.getElementById('r-check-btn').disabled = true;
+  } else {
+    S.r.wr++; S.wr++;
+    fb('r-fb', false, '❌ Nije tačno. ' + expl);
+  }
   updateGlobal();
 }
 
@@ -819,6 +856,7 @@ function jType(btn, type) {
 }
 function jNew() {
   clearFb('j-fb');
+  document.getElementById('j-check-btn').disabled = false;
   document.getElementById('j-inp').value = '';
   const q = genJQ(S.j.type);
   S.j.ans = q.ans;
@@ -828,9 +866,12 @@ function jCheck() {
   const inp = parseFloat(document.getElementById('j-inp').value);
   if (isNaN(inp)) { fb('j-fb', false, 'Upiši broj za x!'); return; }
   if (Math.abs(inp - S.j.ans) < 0.001) {
-    S.j.ok++; S.ok++; document.getElementById('j-ok').textContent = S.j.ok; fb('j-fb', true, `🎉 Tačno! x = ${S.j.ans}`);
+    S.j.ok++; S.ok++;
+    fb('j-fb', true, `🎉 Tačno! x = ${S.j.ans}`);
+    document.getElementById('j-check-btn').disabled = true;
   } else {
-    S.j.wr++; S.wr++; document.getElementById('j-wr').textContent = S.j.wr; fb('j-fb', false, `❌ Nije tačno. x = ${S.j.ans}`);
+    S.j.wr++; S.wr++;
+    fb('j-fb', false, `❌ Nije tačno. x = ${S.j.ans}`);
   }
   updateGlobal();
 }
@@ -846,6 +887,7 @@ function nType(btn, type) {
 }
 function nNew() {
   clearFb('n-fb');
+  document.getElementById('n-check-btn').disabled = false;
   document.getElementById('n-inp').value = '';
   document.getElementById('n-sign').value = '';
   const q = genNQ(S.n.type);
@@ -859,9 +901,12 @@ function nCheck() {
   if (!signInp || isNaN(valInp)) { fb('n-fb', false, 'Odaberi znak i upiši broj!'); return; }
   const ok = signInp === S.n.sign && Math.abs(valInp - S.n.val) < 0.001;
   if (ok) {
-    S.n.ok++; S.ok++; document.getElementById('n-ok').textContent = S.n.ok; fb('n-fb', true, `🎉 Tačno! x ${S.n.sign} ${S.n.val}`);
+    S.n.ok++; S.ok++;
+    fb('n-fb', true, `🎉 Tačno! x ${S.n.sign} ${S.n.val}`);
+    document.getElementById('n-check-btn').disabled = true;
   } else {
-    S.n.wr++; S.wr++; document.getElementById('n-wr').textContent = S.n.wr; fb('n-fb', false, `❌ Nije tačno. x ${S.n.sign} ${S.n.val}`);
+    S.n.wr++; S.wr++;
+    fb('n-fb', false, `❌ Nije tačno. x ${S.n.sign} ${S.n.val}`);
   }
   updateGlobal();
 }
