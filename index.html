@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matematika za Unu</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
+/* ─── Header ─── */
+.header {
+  background: linear-gradient(135deg, #4776E6, #8E54E9);
+  padding: 20px 28px 14px;
+  color: white;
+  text-align: center;
+}
+.header h1 { font-size: 1.8em; letter-spacing: 0.5px; }
+.header p  { margin-top: 3px; opacity: 0.85; font-size: 0.95em; }
+
+.deadline-badge {
+  display: inline-block;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.22);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-size: 0.88em;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.global-score {
+  display: flex;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.global-score div {
+  flex: 1; text-align: center; color: white;
+  font-size: 0.8em; font-weight: 600; padding: 7px 4px;
+}
+.global-score span { font-size: 1.4em; display: block; line-height: 1.2; }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  background: #f4f6f8;
+  border-bottom: 2px solid #e2e8f0;
+}
+.tab-btn {
+  flex: 1; padding: 13px 5px;
+  border: none; background: transparent; cursor: pointer;
+  font-size: 0.88em; font-weight: 700; color: #718096;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  transition: all 0.22s;
+}
+.tab-btn:hover { background: #edf2f7; color: #4776E6; }
+.tab-btn.active { color: #4776E6; border-bottom-color: #4776E6; background: white; }
+.tab-btn.test-tab.active { color: #e53e3e; border-bottom-color: #e53e3e; }
+
+/* ─── Content ─── */
+.content { padding: 20px 22px 26px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ─── Mini scores ─── */
+.mini-scores { display: flex; gap: 12px; margin-bottom: 16px; }
+.score-card { flex: 1; padding: 10px 12px; border-radius: 12px; text-align: center; color: white; }
+.score-card.c { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.score-card.w { background: linear-gradient(135deg, #f7971e, #ffd200); color: #333; }
+.score-card .num { font-size: 1.9em; font-weight: 700; line-height: 1; }
+.score-card .lbl { font-size: 0.73em; margin-top: 2px; }
+
+/* ─── Pills ─── */
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pill {
+  padding: 7px 14px; border: 2px solid #4776E6; border-radius: 20px;
+  background: white; color: #4776E6; font-size: 0.84em; font-weight: 700;
+  cursor: pointer; transition: all 0.18s;
+}
+.pill:hover { background: #ebf0ff; }
+.pill.active { background: #4776E6; color: white; }
+
+/* ─── Problem card ─── */
+.problem-card {
+  background: linear-gradient(145deg, #f8f9ff, #edf2ff);
+  border: 2px solid #c3d0f5; border-radius: 16px;
+  padding: 26px 20px 20px; text-align: center; margin-bottom: 14px;
+}
+.problem-text {
+  font-size: 1.9em; color: #1a202c; min-height: 54px;
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 6px; margin-bottom: 20px;
+  font-weight: 600; letter-spacing: 0.4px;
+}
+
+/* ─── Fraction display ─── */
+.frac {
+  display: inline-flex; flex-direction: column;
+  align-items: center; font-size: 0.82em;
+  margin: 0 5px; vertical-align: middle; line-height: 1;
+}
+.frac .fn { border-bottom: 2.5px solid #1a202c; padding: 1px 7px 3px; min-width: 22px; text-align: center; }
+.frac .fd { padding: 3px 7px 1px; min-width: 22px; text-align: center; }
+
+/* ─── Fraction input ─── */
+.frac-input { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; margin: 0 5px; }
+.frac-input input {
+  width: 64px; padding: 7px 4px; font-size: 1.1em;
+  border: 2px solid #a0aec0; border-radius: 8px; text-align: center;
+  outline: none; transition: border 0.2s; background: white;
+}
+.frac-input input:focus { border-color: #4776E6; box-shadow: 0 0 0 3px rgba(71,118,230,0.15); }
+.frac-line { width: 64px; height: 2.5px; background: #2d3748; border-radius: 2px; }
+
+/* ─── Number / sign inputs ─── */
+.num-input {
+  width: 88px; padding: 10px 7px; font-size: 1.15em;
+  border: 2px solid #a0aec0; border-radius: 10px; text-align: center;
+  outline: none; transition: border 0.2s; background: white;
+}
+.num-input:focus { border-color: #4776E6; box-shadow: 0 0 0 3px rgba(71,118,230,0.15); }
+.sign-select {
+  padding: 10px 11px; font-size: 1.1em;
+  border: 2px solid #a0aec0; border-radius: 10px;
+  outline: none; background: white; cursor: pointer; font-weight: 600;
+  transition: border 0.2s;
+}
+.sign-select:focus { border-color: #4776E6; }
+.answer-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+/* ─── Feedback ─── */
+.feedback {
+  margin-top: 13px; padding: 10px 16px; border-radius: 10px;
+  font-size: 0.97em; font-weight: 600; display: none; text-align: center;
+}
+.feedback.ok  { background: #c6f6d5; color: #22543d; display: block; border: 1.5px solid #9ae6b4; }
+.feedback.err { background: #fed7d7; color: #742a2a; display: block; border: 1.5px solid #fc8181; }
+
+/* ─── Buttons ─── */
+.btn-row { display: flex; gap: 11px; justify-content: center; }
+.btn {
+  padding: 11px 26px; border: none; border-radius: 11px;
+  font-size: 0.97em; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+.btn:hover { transform: translateY(-2px); box-shadow: 0 5px 16px rgba(0,0,0,0.18); }
+.btn:active { transform: translateY(0); }
+.btn-check  { background: linear-gradient(135deg, #4776E6, #6a9aff); color: white; }
+.btn-new    { background: linear-gradient(135deg, #8E54E9, #b07cff); color: white; }
+.btn-submit { background: linear-gradient(135deg, #e53e3e, #ff6b6b); color: white; }
+
+/* ─── TEST SETUP ─── */
+.t-setup-title { font-size: 1.3em; font-weight: 700; color: #2d3748; margin-bottom: 18px; text-align: center; }
+
+.area-cards { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; }
+.area-card {
+  flex: 1; min-width: 120px;
+  border: 2.5px solid #e2e8f0; border-radius: 14px;
+  padding: 14px 10px; text-align: center; cursor: pointer;
+  transition: all 0.22s; user-select: none;
+}
+.area-card input { display: none; }
+.area-card .ac-icon { font-size: 1.8em; display: block; margin-bottom: 6px; }
+.area-card .ac-label { font-size: 0.9em; font-weight: 700; color: #4a5568; }
+.area-card.checked { border-color: #4776E6; background: #ebf4ff; }
+.area-card.checked .ac-label { color: #2b6cb0; }
+
+.setup-row { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.setup-field { flex: 1; min-width: 140px; }
+.setup-field label { display: block; font-size: 0.85em; font-weight: 700; color: #718096; margin-bottom: 6px; }
+.setup-field select {
+  width: 100%; padding: 11px 13px; font-size: 1em;
+  border: 2px solid #e2e8f0; border-radius: 11px; background: white;
+  outline: none; cursor: pointer; font-weight: 600;
+}
+.setup-field select:focus { border-color: #4776E6; }
+
+.btn-start {
+  display: block; width: 100%; padding: 15px;
+  background: linear-gradient(135deg, #e53e3e, #f56565);
+  color: white; font-size: 1.15em; font-weight: 800;
+  border: none; border-radius: 14px; cursor: pointer;
+  letter-spacing: 0.5px; transition: all 0.2s;
+}
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(229,62,62,0.35); }
+
+/* ─── TEST RUNNING ─── */
+.t-top-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.t-qnum { font-size: 0.95em; font-weight: 700; color: #718096; }
+.t-timer-box {
+  font-size: 1.05em; font-weight: 800; color: #2d3748;
+  background: #f0f4ff; border: 2px solid #c3d0f5;
+  border-radius: 10px; padding: 5px 14px;
+  min-width: 90px; text-align: center;
+  transition: color 0.3s, background 0.3s;
+}
+.t-timer-box.urgent { color: #e53e3e; background: #fff5f5; border-color: #feb2b2; }
+
+.t-prog-wrap { background: #e2e8f0; border-radius: 8px; height: 8px; margin-bottom: 14px; overflow: hidden; }
+.t-prog-fill { height: 100%; background: linear-gradient(90deg, #4776E6, #8E54E9); border-radius: 8px; transition: width 0.4s; }
+
+.t-area-badge {
+  display: inline-block; margin-bottom: 10px;
+  padding: 3px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 700;
+  background: #e9d8fd; color: #553c9a;
+}
+
+.t-nav-dots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 18px; }
+.ndot {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75em; font-weight: 700; cursor: pointer;
+  border: 2px solid #e2e8f0; color: #a0aec0; background: white;
+  transition: all 0.18s;
+}
+.ndot:hover { border-color: #4776E6; color: #4776E6; }
+.ndot.nd-cur  { border-color: #4776E6; background: #4776E6; color: white; }
+.ndot.nd-done { border-color: #38a169; background: #c6f6d5; color: #22543d; }
+
+/* ─── TEST RESULTS ─── */
+.t-result-wrap { text-align: center; }
+
+.t-grade-card {
+  background: linear-gradient(145deg, #f0f4ff, #e9d8fd);
+  border: 2px solid #c3d0f5; border-radius: 20px;
+  padding: 30px 20px 24px; margin-bottom: 18px;
+}
+.t-res-emoji { font-size: 4em; line-height: 1; margin-bottom: 8px; }
+.t-res-score { font-size: 3.5em; font-weight: 800; color: #2d3748; line-height: 1; }
+.t-res-pct   { font-size: 1.3em; color: #718096; font-weight: 600; margin: 4px 0; }
+.t-res-grade {
+  display: inline-block; margin-top: 10px;
+  font-size: 1.2em; font-weight: 800;
+  padding: 8px 24px; border-radius: 30px;
+  background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.t-area-breakdown { margin-bottom: 16px; }
+.t-area-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 16px; border-radius: 10px; margin-bottom: 8px;
+  background: #f7fafc; border: 1.5px solid #e2e8f0;
+  font-size: 0.95em;
+}
+.t-area-row .ar-name { font-weight: 700; color: #2d3748; }
+.t-area-row .ar-score { font-weight: 700; color: #4a5568; }
+
+.q-dots-title { font-size: 0.82em; color: #718096; margin-bottom: 8px; font-weight: 700; }
+.q-dots { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 18px; }
+.qdot {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.76em; font-weight: 700; border: 2px solid;
+}
+.qdot.qd-ok  { background: #c6f6d5; border-color: #68d391; color: #22543d; }
+.qdot.qd-err { background: #fed7d7; border-color: #fc8181; color: #742a2a; }
+.qdot.qd-skip { background: #f7fafc; border-color: #e2e8f0; color: #a0aec0; }
+
+.n-hint-text { font-size: 0.84em; color: #718096; margin-bottom: 12px; }
+
+/* ─── Time input ─── */
+.time-input {
+  width: 76px; padding: 10px 7px; font-size: 1.05em;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  text-align: center; outline: none; font-weight: 700;
+  transition: border 0.2s;
+}
+.time-input:focus { border-color: #4776E6; box-shadow: 0 0 0 3px rgba(71,118,230,0.15); }
+
+/* ─── Review ─── */
+.review-card {
+  border-radius: 12px; border: 2px solid #e2e8f0;
+  border-left: 5px solid #e2e8f0;
+  padding: 14px 16px; margin-bottom: 11px;
+}
+.rv-ok   { border-left-color: #38a169; background: #f0fff4; border-color: #9ae6b4; }
+.rv-err  { border-left-color: #e53e3e; background: #fff5f5; border-color: #feb2b2; }
+.rv-skip { border-left-color: #a0aec0; background: #f7fafc; }
+.rv-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:7px; }
+.rv-num  { font-size: 0.78em; font-weight: 700; color: #718096; text-transform: uppercase; letter-spacing: 0.4px; }
+.rv-icon { font-size: 1.1em; }
+.rv-prob {
+  font-size: 1.2em; font-weight: 600; color: #2d3748; margin-bottom: 10px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 4px;
+}
+.rv-answers { border-top: 1px solid rgba(0,0,0,0.07); padding-top: 9px; }
+.rv-ans-row { display: flex; gap: 10px; align-items: center; margin-top: 5px; font-size: 0.9em; }
+.rv-label   { color: #718096; font-weight: 700; min-width: 118px; flex-shrink: 0; }
+.rv-val     { font-weight: 700; font-size: 1em; }
+.rv-ok-val  { color: #22543d; }
+.rv-err-val { color: #742a2a; }
+.rv-skip-val { color: #a0aec0; }
+
+/* ─── Confetti canvas ─── */
+#confetti-canvas {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none; z-index: 9999;
+  display: none;
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🧮 Matematika za Unu</h1>
+    <p>Razlomci &nbsp;·&nbsp; Jednačine &nbsp;·&nbsp; Nejednačine</p>
+    <div class="deadline-badge">📅 Rok za rešavanje: 10. Maj 2026</div>
+    <div class="global-score">
+      <div><span id="g-ok">0</span>✅ Tačno</div>
+      <div><span id="g-wr">0</span>❌ Netačno</div>
+      <div><span id="g-pct">—</span>Uspešnost</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab(this,'razlomci')">📊 Razlomci</button>
+    <button class="tab-btn" onclick="switchTab(this,'jednacine')">⚖️ Jednačine</button>
+    <button class="tab-btn" onclick="switchTab(this,'nejednacine')">📐 Nejednačine</button>
+    <button class="tab-btn test-tab" onclick="switchTab(this,'test')">🎯 Test</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== RAZLOMCI ===== -->
+    <div id="razlomci" class="section active">
+      <div class="mini-scores">
+        <div class="score-card c"><div class="num" id="r-ok">0</div><div class="lbl">Tačno</div></div>
+        <div class="score-card w"><div class="num" id="r-wr">0</div><div class="lbl">Netačno</div></div>
+      </div>
+      <div class="pills" id="r-pills">
+        <button class="pill active" onclick="rTopic(this,'sabiranje')">➕ Sabiranje</button>
+        <button class="pill" onclick="rTopic(this,'oduzimanje')">➖ Oduzimanje</button>
+        <button class="pill" onclick="rTopic(this,'mnozenje')">✖ Množenje</button>
+        <button class="pill" onclick="rTopic(this,'deljenje')">÷ Deljenje</button>
+        <button class="pill" onclick="rTopic(this,'uporedjivanje')">⚖ Upoređivanje</button>
+        <button class="pill" onclick="rTopic(this,'skracivanje')">✂ Skraćivanje</button>
+      </div>
+      <div class="problem-card">
+        <div class="problem-text" id="r-prob"></div>
+        <div class="answer-row" id="r-ans-row"></div>
+        <div class="feedback" id="r-fb"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="rCheck()">Proveri ✓</button>
+        <button class="btn btn-new" onclick="rNew()">Novi zadatak 🔄</button>
+      </div>
+    </div>
+
+    <!-- ===== JEDNAČINE ===== -->
+    <div id="jednacine" class="section">
+      <div class="mini-scores">
+        <div class="score-card c"><div class="num" id="j-ok">0</div><div class="lbl">Tačno</div></div>
+        <div class="score-card w"><div class="num" id="j-wr">0</div><div class="lbl">Netačno</div></div>
+      </div>
+      <div class="pills" id="j-pills">
+        <button class="pill active" onclick="jType(this,'plus')">x + a = b</button>
+        <button class="pill" onclick="jType(this,'minus')">x − a = b</button>
+        <button class="pill" onclick="jType(this,'times')">a · x = b</button>
+        <button class="pill" onclick="jType(this,'div')">x ÷ a = b</button>
+        <button class="pill" onclick="jType(this,'combo')">Kombinovane</button>
+      </div>
+      <div class="problem-card">
+        <div class="problem-text" id="j-prob"></div>
+        <div class="answer-row">
+          <span style="font-size:1.15em;font-weight:700;color:#2d3748">x =</span>
+          <input type="number" class="num-input" id="j-inp" step="any" placeholder="?"
+                 onkeydown="if(event.key==='Enter')jCheck()">
+        </div>
+        <div class="feedback" id="j-fb"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="jCheck()">Proveri ✓</button>
+        <button class="btn btn-new" onclick="jNew()">Novi zadatak 🔄</button>
+      </div>
+    </div>
+
+    <!-- ===== NEJEDNAČINE ===== -->
+    <div id="nejednacine" class="section">
+      <div class="mini-scores">
+        <div class="score-card c"><div class="num" id="n-ok">0</div><div class="lbl">Tačno</div></div>
+        <div class="score-card w"><div class="num" id="n-wr">0</div><div class="lbl">Netačno</div></div>
+      </div>
+      <div class="pills" id="n-pills">
+        <button class="pill active" onclick="nType(this,'plus')">x + a ○ b</button>
+        <button class="pill" onclick="nType(this,'minus')">x − a ○ b</button>
+        <button class="pill" onclick="nType(this,'times')">a·x ○ b</button>
+        <button class="pill" onclick="nType(this,'combo')">Mešovite</button>
+      </div>
+      <div class="problem-card">
+        <div class="problem-text" id="n-prob"></div>
+        <div class="n-hint-text">Reši nejednačinu i upiši skup rešenja (x ○ broj):</div>
+        <div class="answer-row">
+          <span style="font-size:1.15em;font-weight:700;color:#2d3748">x</span>
+          <select class="sign-select" id="n-sign">
+            <option value="">znak</option>
+            <option value=">">&gt;</option>
+            <option value="<">&lt;</option>
+            <option value="≥">≥</option>
+            <option value="≤">≤</option>
+          </select>
+          <input type="number" class="num-input" id="n-inp" step="any" placeholder="?"
+                 onkeydown="if(event.key==='Enter')nCheck()">
+        </div>
+        <div class="feedback" id="n-fb"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-check" onclick="nCheck()">Proveri ✓</button>
+        <button class="btn btn-new" onclick="nNew()">Novi zadatak 🔄</button>
+      </div>
+    </div>
+
+    <!-- ===== TEST ===== -->
+    <div id="test" class="section">
+
+      <!-- Setup -->
+      <div id="t-setup">
+        <div class="t-setup-title">⚙️ Podešavanja testa</div>
+
+        <div style="font-size:0.85em;font-weight:700;color:#718096;margin-bottom:10px">Oblast:</div>
+        <div class="area-cards">
+          <label class="area-card checked" id="card-r" onclick="toggleCard(this,'t-area-r')">
+            <input type="checkbox" id="t-area-r" checked>
+            <span class="ac-icon">📊</span>
+            <span class="ac-label">Razlomci</span>
+          </label>
+          <label class="area-card checked" id="card-j" onclick="toggleCard(this,'t-area-j')">
+            <input type="checkbox" id="t-area-j" checked>
+            <span class="ac-icon">⚖️</span>
+            <span class="ac-label">Jednačine</span>
+          </label>
+          <label class="area-card checked" id="card-n" onclick="toggleCard(this,'t-area-n')">
+            <input type="checkbox" id="t-area-n" checked>
+            <span class="ac-icon">📐</span>
+            <span class="ac-label">Nejednačine</span>
+          </label>
+        </div>
+
+        <div class="setup-row">
+          <div class="setup-field">
+            <label>Broj pitanja</label>
+            <select id="t-numq">
+              <option value="5">5 pitanja</option>
+              <option value="10" selected>10 pitanja</option>
+              <option value="15">15 pitanja</option>
+              <option value="20">20 pitanja</option>
+            </select>
+          </div>
+          <div class="setup-field">
+            <label>Vremensko ograničenje</label>
+            <div style="display:flex;align-items:center;gap:10px">
+              <input type="number" class="time-input" id="t-time" value="10" min="0" max="180" step="1">
+              <span style="font-size:0.82em;color:#718096;white-space:nowrap">min &nbsp;(0 = bez ogr.)</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-start" onclick="tStart()">🚀 Pokreni test</button>
+      </div>
+
+      <!-- Running -->
+      <div id="t-running" style="display:none">
+        <div class="t-top-bar">
+          <span class="t-qnum" id="t-qnum">Pitanje 1/10</span>
+          <span class="t-timer-box" id="t-timer">⏱ —</span>
+        </div>
+        <div class="t-prog-wrap"><div class="t-prog-fill" id="t-prog" style="width:10%"></div></div>
+
+        <div class="problem-card">
+          <div><span class="t-area-badge" id="t-area-badge">Oblast</span></div>
+          <div class="problem-text" id="t-prob"></div>
+          <div class="answer-row" id="t-input-area"></div>
+          <div class="t-nav-dots" id="t-nav-dots"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-new" id="t-btn-prev" onclick="tPrev()">← Prethodno</button>
+          <button class="btn btn-check" id="t-btn-next" onclick="tNext()">Sledeće →</button>
+          <button class="btn btn-submit" id="t-btn-submit" onclick="tSubmit(false)" style="display:none">Predaj test ✓</button>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="t-results" style="display:none">
+        <div class="t-result-wrap">
+          <div class="t-grade-card">
+            <div class="t-res-emoji" id="t-res-emoji">🏆</div>
+            <div class="t-res-score" id="t-res-score">—</div>
+            <div class="t-res-pct" id="t-res-pct">—</div>
+            <div class="t-res-grade" id="t-res-grade">—</div>
+          </div>
+
+          <div class="t-area-breakdown" id="t-res-areas"></div>
+
+          <div class="q-dots-title">Pregled pitanja:</div>
+          <div class="q-dots" id="t-res-dots"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-new" onclick="tNewTest()">Novi test 🔄</button>
+          <button class="btn btn-check" onclick="tShowReview()">Pregledaj odgovore 📋</button>
+        </div>
+      </div>
+
+      <!-- Review -->
+      <div id="t-review" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div style="font-weight:700;color:#2d3748;font-size:1.05em">📋 Pregled testa</div>
+          <button class="btn btn-new" style="padding:8px 16px;font-size:0.86em" onclick="tBackToResults()">← Rezultati</button>
+        </div>
+        <div id="t-review-list"></div>
+      </div>
+
+    </div><!-- /test -->
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Practice state
+// ============================================================
+const S = {
+  ok: 0, wr: 0,
+  r: { topic: 'sabiranje', ans: null, ok: 0, wr: 0 },
+  j: { type:  'plus',      ans: null, ok: 0, wr: 0 },
+  n: { type:  'plus', sign: null, val: null, ok: 0, wr: 0 }
+};
+
+// Test state
+const T = {
+  questions:   [],
+  userAnswers: [],
+  current:     0,
+  numQ:        10,
+  timeLimit:   10,
+  secondsLeft: 0,
+  timerInt:    null
+};
+
+const SIGNS = ['>', '<', '≥', '≤'];
+
+// ============================================================
+// Utilities
+// ============================================================
+function ri(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { const t = b; b = a % b; a = t; }
+  return a || 1;
+}
+function lcm(a, b)      { return (a * b) / gcd(a, b); }
+function simplify(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  const g = gcd(Math.abs(n), d);
+  return { n: n / g, d: d / g };
+}
+function fHtml(n, d) {
+  if (d === 1) return `<b>${n}</b>`;
+  return `<span class="frac"><span class="fn">${n}</span><span class="fd">${d}</span></span>`;
+}
+
+// ============================================================
+// Global score
+// ============================================================
+function updateGlobal() {
+  document.getElementById('g-ok').textContent = S.ok;
+  document.getElementById('g-wr').textContent = S.wr;
+  const t = S.ok + S.wr;
+  document.getElementById('g-pct').textContent = t ? Math.round(S.ok / t * 100) + '%' : '—';
+}
+
+// ============================================================
+// Tabs
+// ============================================================
+function switchTab(btn, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tab).classList.add('active');
+}
+
+// ============================================================
+// Feedback
+// ============================================================
+function fb(id, ok, msg) {
+  const el = document.getElementById(id);
+  el.className = 'feedback ' + (ok ? 'ok' : 'err');
+  el.textContent = msg;
+}
+function clearFb(id) { document.getElementById(id).className = 'feedback'; }
+
+// ============================================================
+// QUESTION GENERATORS  (shared by practice + test)
+// ============================================================
+function genRQ(topic) {
+  if (!topic) {
+    const all = ['sabiranje','oduzimanje','mnozenje','deljenje','uporedjivanje','skracivanje'];
+    topic = all[ri(0, all.length - 1)];
+  }
+
+  let prob = '', ans = null;
+
+  for (let attempt = 0; attempt < 40; attempt++) {
+    if (topic === 'sabiranje') {
+      if (Math.random() < 0.5) {
+        const d = ri(2, 12), n1 = ri(1, d - 1), n2 = ri(1, Math.max(1, d - n1));
+        ans = simplify(n1 + n2, d);
+        prob = `${fHtml(n1, d)} + ${fHtml(n2, d)} = ?`;
+      } else {
+        const d1 = ri(2, 8), d2 = ri(2, 8), n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
+        const L = lcm(d1, d2);
+        ans = simplify(n1 * (L / d1) + n2 * (L / d2), L);
+        prob = `${fHtml(n1, d1)} + ${fHtml(n2, d2)} = ?`;
+      }
+      break;
+
+    } else if (topic === 'oduzimanje') {
+      if (Math.random() < 0.5) {
+        const d = ri(2, 12), n2 = ri(1, d - 2), n1 = ri(n2 + 1, d - 1);
+        ans = simplify(n1 - n2, d);
+        prob = `${fHtml(n1, d)} − ${fHtml(n2, d)} = ?`;
+        break;
+      } else {
+        const d1 = ri(2, 8), d2 = ri(2, 8), n1 = ri(1, d1 - 1), n2 = ri(1, d2 - 1);
+        const L = lcm(d1, d2);
+        const rn = n1 * (L / d1) - n2 * (L / d2);
+        if (rn > 0) { ans = simplify(rn, L); prob = `${fHtml(n1, d1)} − ${fHtml(n2, d2)} = ?`; break; }
+      }
+
+    } else if (topic === 'mnozenje') {
+      const n1 = ri(1, 5), d1 = ri(2, 7), n2 = ri(1, 5), d2 = ri(2, 7);
+      ans = simplify(n1 * n2, d1 * d2);
+      prob = `${fHtml(n1, d1)} · ${fHtml(n2, d2)} = ?`;
+      break;
+
+    } else if (topic === 'deljenje') {
+      const n1 = ri(1, 5), d1 = ri(2, 7), n2 = ri(1, 5), d2 = ri(2, 7);
+      ans = simplify(n1 * d2, d1 * n2);
+      prob = `${fHtml(n1, d1)} ÷ ${fHtml(n2, d2)} = ?`;
+      break;
+
+    } else if (topic === 'uporedjivanje') {
+      const d1 = ri(2, 9), n1 = ri(1, d1 - 1), d2 = ri(2, 9), n2 = ri(1, d2 - 1);
+      const diff = n1 / d1 - n2 / d2;
+      const sign = diff > 0.0001 ? '>' : diff < -0.0001 ? '<' : '=';
+      ans = { fsign: true, value: sign };
+      prob = `${fHtml(n1, d1)} &nbsp;?&nbsp; ${fHtml(n2, d2)}`;
+      break;
+
+    } else if (topic === 'skracivanje') {
+      const g = ri(2, 6);
+      let n = ri(2, 7) * g, d = ri(2, 7) * g;
+      while (n === d) d = ri(2, 7) * g;
+      ans = simplify(n, d);
+      prob = `Skrati razlomak: ${fHtml(n, d)} = ?`;
+      break;
+    }
+  }
+
+  if (!ans) ans = simplify(1, 2);
+
+  return {
+    areaName: 'Razlomci', topic,
+    probHtml: prob,
+    ansType:  ans.fsign ? 'fsign' : 'frac',
+    ans
+  };
+}
+
+function genJQ(type) {
+  if (!type) {
+    const all = ['plus','minus','times','div','combo'];
+    type = all[ri(0, all.length - 1)];
+  }
+  let prob = '', ans = 0;
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    if (type === 'plus')  { const x = ri(1,25), a = ri(1,20);          ans=x; prob=`x + ${a} = ${x+a}`;      break; }
+    if (type === 'minus') { const x = ri(2,25), a = ri(1,x-1);         ans=x; prob=`x − ${a} = ${x-a}`;      break; }
+    if (type === 'times') { const a = ri(2,12), x = ri(1,15);           ans=x; prob=`${a} · x = ${a*x}`;      break; }
+    if (type === 'div')   { const a = ri(2,10), x = ri(1,8)*a;          ans=x; prob=`x ÷ ${a} = ${x/a}`;      break; }
+    if (type === 'combo') {
+      const ch = ri(1,4);
+      if (ch===1) { const a=ri(2,5),x=ri(1,12),b=ri(1,15);             ans=x; prob=`${a}·x + ${b} = ${a*x+b}`; break; }
+      if (ch===2) { const a=ri(2,5),x=ri(2,12),b=ri(1,10);             ans=x; prob=`${a}·x − ${b} = ${a*x-b}`; break; }
+      if (ch===3) { const a=ri(2,6),x=ri(1,5)*a,b=ri(1,10);            ans=x; prob=`x ÷ ${a} + ${b} = ${x/a+b}`; break; }
+      const a=ri(2,6),x=ri(3,7)*a,b=ri(1,5),c=x/a-b;
+      if (c>0) { ans=x; prob=`x ÷ ${a} − ${b} = ${c}`; break; }
+    }
+  }
+
+  return { areaName: 'Jednačine', type, probHtml: prob, ansType: 'num', ans };
+}
+
+function genNQ(type) {
+  if (!type) {
+    const all = ['plus','minus','times','combo'];
+    type = all[ri(0, all.length - 1)];
+  }
+  const sign = SIGNS[ri(0, 3)];
+  let prob = '', val = 0;
+
+  if (type === 'plus')  { const a=ri(1,15),b=ri(a+2,a+25); val=b-a; prob=`x + ${a} ${sign} ${b}`; }
+  if (type === 'minus') { const a=ri(1,12),b=ri(1,20);     val=b+a; prob=`x − ${a} ${sign} ${b}`; }
+  if (type === 'times') { const a=ri(2,8), xv=ri(1,10);    val=xv;  prob=`${a}·x ${sign} ${a*xv}`; }
+  if (type === 'combo') { const a=ri(2,5),b=ri(1,10),xv=ri(1,10); val=xv; prob=`${a}·x + ${b} ${sign} ${a*xv+b}`; }
+
+  return { areaName: 'Nejednačine', type, probHtml: prob, ansType: 'signum', ans: { sign, val } };
+}
+
+// ============================================================
+// RAZLOMCI practice
+// ============================================================
+function rTopic(btn, topic) {
+  S.r.topic = topic;
+  document.querySelectorAll('#r-pills .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rNew();
+}
+function rNew() {
+  clearFb('r-fb');
+  const q = genRQ(S.r.topic);
+  S.r.ans = q.ans;
+  document.getElementById('r-prob').innerHTML = q.probHtml;
+  buildRInput(q.ans);
+}
+function buildRInput(ans) {
+  const row = document.getElementById('r-ans-row');
+  if (ans && ans.fsign) {
+    row.innerHTML = `
+      <select class="sign-select" id="r-sign">
+        <option value="">Odaberi</option>
+        <option value=">">&gt;</option>
+        <option value="<">&lt;</option>
+        <option value="=">=</option>
+      </select>`;
+  } else {
+    row.innerHTML = `
+      <div class="frac-input">
+        <input type="number" id="r-num" placeholder="?" step="any" onkeydown="if(event.key==='Enter')rCheck()">
+        <div class="frac-line"></div>
+        <input type="number" id="r-den" placeholder="?" step="any" min="1" onkeydown="if(event.key==='Enter')rCheck()">
+      </div>`;
+  }
+}
+function rCheck() {
+  const ans = S.r.ans;
+  if (!ans) return;
+  let correct = false, expl = '';
+
+  if (ans.fsign) {
+    const v = document.getElementById('r-sign').value;
+    correct = v === ans.value;
+    expl = `Tačan odgovor: ${ans.value}`;
+  } else {
+    const n = parseInt(document.getElementById('r-num').value);
+    const d = parseInt(document.getElementById('r-den').value);
+    if (isNaN(n) || isNaN(d) || d === 0) { fb('r-fb', false, 'Unesi i brojnik i imenilac!'); return; }
+    const s = simplify(n, d);
+    correct = s.n === ans.n && s.d === ans.d;
+    expl = ans.d === 1 ? `Tačan odgovor: ${ans.n}` : `Tačan odgovor: ${ans.n}/${ans.d}`;
+  }
+  if (correct) { S.r.ok++; S.ok++; document.getElementById('r-ok').textContent = S.r.ok; fb('r-fb', true, '🎉 Odlično! Tačno!'); }
+  else         { S.r.wr++; S.wr++; document.getElementById('r-wr').textContent = S.r.wr; fb('r-fb', false, '❌ Nije tačno. ' + expl); }
+  updateGlobal();
+}
+
+// ============================================================
+// JEDNAČINE practice
+// ============================================================
+function jType(btn, type) {
+  S.j.type = type;
+  document.querySelectorAll('#j-pills .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  jNew();
+}
+function jNew() {
+  clearFb('j-fb');
+  document.getElementById('j-inp').value = '';
+  const q = genJQ(S.j.type);
+  S.j.ans = q.ans;
+  document.getElementById('j-prob').textContent = q.probHtml;
+}
+function jCheck() {
+  const inp = parseFloat(document.getElementById('j-inp').value);
+  if (isNaN(inp)) { fb('j-fb', false, 'Upiši broj za x!'); return; }
+  if (Math.abs(inp - S.j.ans) < 0.001) {
+    S.j.ok++; S.ok++; document.getElementById('j-ok').textContent = S.j.ok; fb('j-fb', true, `🎉 Tačno! x = ${S.j.ans}`);
+  } else {
+    S.j.wr++; S.wr++; document.getElementById('j-wr').textContent = S.j.wr; fb('j-fb', false, `❌ Nije tačno. x = ${S.j.ans}`);
+  }
+  updateGlobal();
+}
+
+// ============================================================
+// NEJEDNAČINE practice
+// ============================================================
+function nType(btn, type) {
+  S.n.type = type;
+  document.querySelectorAll('#n-pills .pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  nNew();
+}
+function nNew() {
+  clearFb('n-fb');
+  document.getElementById('n-inp').value = '';
+  document.getElementById('n-sign').value = '';
+  const q = genNQ(S.n.type);
+  S.n.sign = q.ans.sign;
+  S.n.val  = q.ans.val;
+  document.getElementById('n-prob').textContent = q.probHtml;
+}
+function nCheck() {
+  const signInp = document.getElementById('n-sign').value;
+  const valInp  = parseFloat(document.getElementById('n-inp').value);
+  if (!signInp || isNaN(valInp)) { fb('n-fb', false, 'Odaberi znak i upiši broj!'); return; }
+  const ok = signInp === S.n.sign && Math.abs(valInp - S.n.val) < 0.001;
+  if (ok) {
+    S.n.ok++; S.ok++; document.getElementById('n-ok').textContent = S.n.ok; fb('n-fb', true, `🎉 Tačno! x ${S.n.sign} ${S.n.val}`);
+  } else {
+    S.n.wr++; S.wr++; document.getElementById('n-wr').textContent = S.n.wr; fb('n-fb', false, `❌ Nije tačno. x ${S.n.sign} ${S.n.val}`);
+  }
+  updateGlobal();
+}
+
+// ============================================================
+// TEST — setup
+// ============================================================
+function toggleCard(card, cbId) {
+  const cb = document.getElementById(cbId);
+  cb.checked = !cb.checked;
+  card.classList.toggle('checked', cb.checked);
+}
+
+function tStart() {
+  const aR = document.getElementById('t-area-r').checked;
+  const aJ = document.getElementById('t-area-j').checked;
+  const aN = document.getElementById('t-area-n').checked;
+  if (!aR && !aJ && !aN) { alert('Odaberi bar jednu oblast!'); return; }
+
+  T.numQ      = parseInt(document.getElementById('t-numq').value);
+  T.timeLimit = parseInt(document.getElementById('t-time').value);
+
+  // Build area pool (round-robin ensures balance)
+  const pool = [];
+  if (aR) pool.push('r');
+  if (aJ) pool.push('j');
+  if (aN) pool.push('n');
+
+  T.questions = [];
+  for (let i = 0; i < T.numQ; i++) {
+    const area = pool[i % pool.length];
+    if (area === 'r') T.questions.push(genRQ());
+    else if (area === 'j') T.questions.push(genJQ());
+    else T.questions.push(genNQ());
+  }
+  // Shuffle
+  for (let i = T.questions.length - 1; i > 0; i--) {
+    const j = ri(0, i);
+    [T.questions[i], T.questions[j]] = [T.questions[j], T.questions[i]];
+  }
+
+  T.userAnswers = new Array(T.numQ).fill(null);
+  T.current = 0;
+
+  // Timer
+  if (T.timerInt) clearInterval(T.timerInt);
+  if (T.timeLimit > 0) {
+    T.secondsLeft = T.timeLimit * 60;
+    tUpdateTimerDisplay();
+    T.timerInt = setInterval(tTick, 1000);
+  } else {
+    document.getElementById('t-timer').textContent = '⏱ ∞';
+  }
+
+  document.getElementById('t-setup').style.display   = 'none';
+  document.getElementById('t-running').style.display = 'block';
+  document.getElementById('t-results').style.display = 'none';
+  tRenderQ();
+}
+
+// ============================================================
+// TEST — timer
+// ============================================================
+function tTick() {
+  T.secondsLeft--;
+  tUpdateTimerDisplay();
+  if (T.secondsLeft <= 0) {
+    clearInterval(T.timerInt);
+    T.timerInt = null;
+    tSubmit(true);
+  }
+}
+function tUpdateTimerDisplay() {
+  const m = Math.floor(T.secondsLeft / 60);
+  const s = (T.secondsLeft % 60).toString().padStart(2, '0');
+  const el = document.getElementById('t-timer');
+  el.textContent = `⏱ ${m}:${s}`;
+  el.classList.toggle('urgent', T.secondsLeft <= 60);
+}
+
+// ============================================================
+// TEST — navigation & rendering
+// ============================================================
+function tSaveAnswer() {
+  const q = T.questions[T.current];
+  if (!q) return;
+  if (q.ansType === 'frac') {
+    const n = document.getElementById('tq-num'), d = document.getElementById('tq-den');
+    if (n && d && n.value !== '' && d.value !== '')
+      T.userAnswers[T.current] = { n: parseInt(n.value), d: parseInt(d.value) };
+  } else if (q.ansType === 'fsign') {
+    const s = document.getElementById('tq-fsign');
+    if (s && s.value) T.userAnswers[T.current] = s.value;
+  } else if (q.ansType === 'num') {
+    const v = document.getElementById('tq-num-inp');
+    if (v && v.value !== '') T.userAnswers[T.current] = parseFloat(v.value);
+  } else if (q.ansType === 'signum') {
+    const s = document.getElementById('tq-sign'), v = document.getElementById('tq-val');
+    if (s && v && s.value && v.value !== '')
+      T.userAnswers[T.current] = { sign: s.value, val: parseFloat(v.value) };
+  }
+}
+
+function tRenderQ() {
+  const q     = T.questions[T.current];
+  const total = T.questions.length;
+  const pct   = ((T.current + 1) / total * 100).toFixed(1);
+
+  document.getElementById('t-qnum').textContent    = `Pitanje ${T.current + 1} / ${total}`;
+  document.getElementById('t-prog').style.width    = pct + '%';
+  document.getElementById('t-area-badge').textContent = q.areaName;
+  document.getElementById('t-prob').innerHTML      = q.probHtml;
+  document.getElementById('t-input-area').innerHTML = buildTInput(q, T.userAnswers[T.current]);
+
+  document.getElementById('t-btn-prev').disabled           = T.current === 0;
+  document.getElementById('t-btn-next').style.display      = T.current < total - 1 ? '' : 'none';
+  document.getElementById('t-btn-submit').style.display    = T.current === total - 1 ? '' : 'none';
+
+  tRenderDots();
+}
+
+function buildTInput(q, saved) {
+  if (q.ansType === 'frac') {
+    const n = saved ? saved.n : '', d = saved ? saved.d : '';
+    return `
+      <div class="frac-input">
+        <input type="number" id="tq-num" value="${n}" placeholder="?" step="any"
+               onkeydown="if(event.key==='Enter'){tSaveAnswer();if(T.current<T.questions.length-1)tNext();}">
+        <div class="frac-line"></div>
+        <input type="number" id="tq-den" value="${d}" placeholder="?" step="any" min="1"
+               onkeydown="if(event.key==='Enter'){tSaveAnswer();if(T.current<T.questions.length-1)tNext();}">
+      </div>`;
+  }
+  if (q.ansType === 'fsign') {
+    const v = saved || '';
+    return `
+      <select class="sign-select" id="tq-fsign">
+        <option value="">Odaberi</option>
+        <option value=">" ${v==='>'?'selected':''}>&gt;</option>
+        <option value="<" ${v==='<'?'selected':''}>&lt;</option>
+        <option value="=" ${v==='='?'selected':''}>=</option>
+      </select>`;
+  }
+  if (q.ansType === 'num') {
+    const v = (saved !== null && saved !== undefined) ? saved : '';
+    return `
+      <span style="font-size:1.15em;font-weight:700;color:#2d3748">x =</span>
+      <input type="number" class="num-input" id="tq-num-inp" value="${v}" placeholder="?" step="any"
+             onkeydown="if(event.key==='Enter'){tSaveAnswer();if(T.current<T.questions.length-1)tNext();}">`;
+  }
+  if (q.ansType === 'signum') {
+    const sv = saved ? saved.sign : '', vv = saved ? saved.val : '';
+    return `
+      <span style="font-size:1.15em;font-weight:700;color:#2d3748">x</span>
+      <select class="sign-select" id="tq-sign">
+        <option value="">znak</option>
+        <option value=">" ${sv==='>'?'selected':''}>&gt;</option>
+        <option value="<" ${sv==='<'?'selected':''}>&lt;</option>
+        <option value="≥" ${sv==='≥'?'selected':''}>≥</option>
+        <option value="≤" ${sv==='≤'?'selected':''}>≤</option>
+      </select>
+      <input type="number" class="num-input" id="tq-val" value="${vv}" placeholder="?" step="any">`;
+  }
+  return '';
+}
+
+function tRenderDots() {
+  const container = document.getElementById('t-nav-dots');
+  container.innerHTML = T.questions.map((_, i) => {
+    let cls = 'ndot';
+    if      (i === T.current)            cls += ' nd-cur';
+    else if (T.userAnswers[i] !== null)  cls += ' nd-done';
+    return `<span class="${cls}" onclick="tGoTo(${i})">${i + 1}</span>`;
+  }).join('');
+}
+
+function tGoTo(idx) { tSaveAnswer(); T.current = idx; tRenderQ(); }
+function tNext()    { tSaveAnswer(); T.current++; tRenderQ(); }
+function tPrev()    { tSaveAnswer(); T.current--; tRenderQ(); }
+
+// ============================================================
+// TEST — submit & results
+// ============================================================
+function isCorrect(q, userAns) {
+  if (userAns === null || userAns === undefined) return false;
+  if (q.ansType === 'frac') {
+    if (isNaN(userAns.n) || isNaN(userAns.d) || userAns.d === 0) return false;
+    const s = simplify(userAns.n, userAns.d);
+    return s.n === q.ans.n && s.d === q.ans.d;
+  }
+  if (q.ansType === 'fsign')  return userAns === q.ans.value;
+  if (q.ansType === 'num')    return Math.abs(userAns - q.ans) < 0.001;
+  if (q.ansType === 'signum') return userAns.sign === q.ans.sign && Math.abs(userAns.val - q.ans.val) < 0.001;
+  return false;
+}
+
+function tSubmit(auto) {
+  tSaveAnswer();
+  if (!auto) {
+    const unanswered = T.userAnswers.filter(a => a === null).length;
+    if (unanswered > 0 && !confirm(`Imaš ${unanswered} neodgovorenih pitanja. Predaješ test?`)) return;
+  }
+  if (T.timerInt) { clearInterval(T.timerInt); T.timerInt = null; }
+  tShowResults();
+}
+
+function tShowResults() {
+  const total = T.questions.length;
+  let correct = 0;
+  const byArea = { 'Razlomci': {ok:0,tot:0}, 'Jednačine': {ok:0,tot:0}, 'Nejednačine': {ok:0,tot:0} };
+
+  T.questions.forEach((q, i) => {
+    const ok = isCorrect(q, T.userAnswers[i]);
+    if (ok) correct++;
+    byArea[q.areaName].tot++;
+    if (ok) byArea[q.areaName].ok++;
+  });
+
+  const pct = Math.round(correct / total * 100);
+
+  // Serbian school grading 1–5
+  let grade, label, emoji;
+  if      (pct >= 90) { grade=5; label='Odličan';    emoji='🏆'; launchConfetti(200); }
+  else if (pct >= 75) { grade=4; label='Vrlo dobar'; emoji='🌟'; launchConfetti(120); }
+  else if (pct >= 60) { grade=3; label='Dobar';      emoji='😊'; launchConfetti(60);  }
+  else if (pct >= 45) { grade=2; label='Dovoljan';   emoji='😐'; }
+  else                { grade=1; label='Nedovoljan';  emoji='😔'; }
+
+  document.getElementById('t-res-emoji').textContent = emoji;
+  document.getElementById('t-res-score').innerHTML   =
+    `${correct}<span style="font-size:0.5em;color:#a0aec0;font-weight:600"> / ${total}</span>`;
+  document.getElementById('t-res-pct').textContent   = `${pct}% tačnih odgovora`;
+  document.getElementById('t-res-grade').textContent = `${emoji} Ocena: ${grade} — ${label}`;
+
+  // Area breakdown
+  document.getElementById('t-res-areas').innerHTML = Object.entries(byArea)
+    .filter(([, v]) => v.tot > 0)
+    .map(([name, v]) => {
+      const ap   = v.tot > 0 ? Math.round(v.ok / v.tot * 100) : 0;
+      const icon = ap >= 75 ? '✅' : ap >= 50 ? '⚠️' : '❌';
+      return `<div class="t-area-row">
+        <span class="ar-name">${icon} ${name}</span>
+        <span class="ar-score">${v.ok}/${v.tot} &nbsp;(${ap}%)</span>
+      </div>`;
+    }).join('');
+
+  // Question dots
+  document.getElementById('t-res-dots').innerHTML = T.questions.map((q, i) => {
+    const ok  = isCorrect(q, T.userAnswers[i]);
+    const cls = T.userAnswers[i] === null ? 'qd-skip' : ok ? 'qd-ok' : 'qd-err';
+    const ic  = T.userAnswers[i] === null ? '—' : ok ? '✓' : '✗';
+    return `<div class="qdot ${cls}" title="${q.areaName}">${ic}</div>`;
+  }).join('');
+
+  // Update global score
+  S.ok += correct;
+  S.wr += (total - correct);
+  updateGlobal();
+
+  document.getElementById('t-setup').style.display   = 'none';
+  document.getElementById('t-running').style.display = 'none';
+  document.getElementById('t-results').style.display = 'block';
+}
+
+function tNewTest() {
+  if (T.timerInt) { clearInterval(T.timerInt); T.timerInt = null; }
+  document.getElementById('t-timer').textContent = '⏱ —';
+  document.getElementById('t-timer').classList.remove('urgent');
+  document.getElementById('t-setup').style.display   = 'block';
+  document.getElementById('t-running').style.display = 'none';
+  document.getElementById('t-results').style.display = 'none';
+}
+
+// ============================================================
+// TEST — review (read-only, no score changes)
+// ============================================================
+function fmtAns(q, ua) {
+  if (ua === null || ua === undefined) return null;
+  if (q.ansType === 'frac')   return (isNaN(ua.n) || isNaN(ua.d)) ? null : `${ua.n}/${ua.d}`;
+  if (q.ansType === 'fsign')  return ua;
+  if (q.ansType === 'num')    return `x = ${ua}`;
+  if (q.ansType === 'signum') return `x ${ua.sign} ${ua.val}`;
+  return null;
+}
+
+function fmtCorrect(q) {
+  if (q.ansType === 'frac')   return q.ans.d === 1 ? `${q.ans.n}` : `${q.ans.n}/${q.ans.d}`;
+  if (q.ansType === 'fsign')  return q.ans.value;
+  if (q.ansType === 'num')    return `x = ${q.ans}`;
+  if (q.ansType === 'signum') return `x ${q.ans.sign} ${q.ans.val}`;
+  return '—';
+}
+
+function tShowReview() {
+  const list = document.getElementById('t-review-list');
+  list.innerHTML = T.questions.map((q, i) => {
+    const ua  = T.userAnswers[i];
+    const ok  = isCorrect(q, ua);
+    const cls = ua === null ? 'rv-skip' : ok ? 'rv-ok' : 'rv-err';
+    const ico = ua === null ? '⬜' : ok ? '✅' : '❌';
+    const uaStr = fmtAns(q, ua);
+    const uaHtml = uaStr === null
+      ? `<span class="rv-val rv-skip-val">nije odgovoreno</span>`
+      : `<span class="rv-val ${ok ? 'rv-ok-val' : 'rv-err-val'}">${uaStr}</span>`;
+
+    return `<div class="review-card ${cls}">
+      <div class="rv-header">
+        <span class="rv-num">${i + 1}. ${q.areaName}</span>
+        <span class="rv-icon">${ico}</span>
+      </div>
+      <div class="rv-prob">${q.probHtml}</div>
+      <div class="rv-answers">
+        <div class="rv-ans-row">
+          <span class="rv-label">Tvoj odgovor:</span>
+          ${uaHtml}
+        </div>
+        ${!ok ? `<div class="rv-ans-row">
+          <span class="rv-label">Tačan odgovor:</span>
+          <span class="rv-val rv-ok-val">${fmtCorrect(q)}</span>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('t-results').style.display = 'none';
+  document.getElementById('t-review').style.display  = 'block';
+}
+
+function launchConfetti(count) {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx    = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = 'block';
+
+  const colors = ['#4776E6','#8E54E9','#38ef7d','#ffd200','#ff6b6b','#f7971e','#11998e','#ffc0cb','#fff'];
+  const pieces = Array.from({ length: count }, () => ({
+    x:   Math.random() * canvas.width,
+    y:   Math.random() * -canvas.height * 0.5 - 20,
+    w:   Math.random() * 11 + 5,
+    h:   Math.random() * 6  + 3,
+    color:    colors[Math.floor(Math.random() * colors.length)],
+    rotation: Math.random() * Math.PI * 2,
+    speed:    Math.random() * 3.5 + 1.5,
+    drift:    Math.random() * 2 - 1,
+    spin:     (Math.random() - 0.5) * 0.18,
+    opacity:  1
+  }));
+
+  let frame = 0;
+  const totalFrames = 320;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.y        += p.speed;
+      p.x        += p.drift;
+      p.rotation += p.spin;
+      if (frame > totalFrames * 0.7)
+        p.opacity = Math.max(0, 1 - (frame - totalFrames * 0.7) / (totalFrames * 0.3));
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < totalFrames) requestAnimationFrame(draw);
+    else { canvas.style.display = 'none'; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  draw();
+}
+
+function tBackToResults() {
+  document.getElementById('t-review').style.display  = 'none';
+  document.getElementById('t-results').style.display = 'block';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+rNew();
+jNew();
+nNew();
+</script>
+</body>
+</html>
