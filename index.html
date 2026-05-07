@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Matematika za Unu</title>
+<title>Matematika za V razred</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -312,6 +312,16 @@ body {
 .rv-err-val { color: #742a2a; }
 .rv-skip-val { color: #a0aec0; }
 
+/* ─── Gift quote ─── */
+.gift-card {
+  background: linear-gradient(135deg, #fffbeb, #fefcbf);
+  border: 2px solid #f6e05e; border-radius: 14px;
+  padding: 14px 18px; margin-bottom: 16px; text-align: center;
+}
+.gift-card .gi   { font-size: 1.4em; margin-bottom: 5px; }
+.gift-card .gt   { font-style: italic; color: #744210; font-size: 0.88em; line-height: 1.55; margin-bottom: 5px; }
+.gift-card .ga   { font-size: 0.78em; font-weight: 700; color: #975a16; }
+
 /* ─── Confetti canvas ─── */
 #confetti-canvas {
   position: fixed; top: 0; left: 0;
@@ -327,9 +337,9 @@ body {
 
   <!-- Header -->
   <div class="header">
-    <h1>🧮 Matematika za Unu</h1>
+    <h1>🧮 Matematika za V razred</h1>
     <p>Razlomci &nbsp;·&nbsp; Jednačine &nbsp;·&nbsp; Nejednačine</p>
-    <div class="deadline-badge">📅 Rok za rešavanje: 10. Maj 2026</div>
+    <p id="header-quote" style="margin-top:10px;font-size:0.72em;opacity:0.82;font-style:italic;line-height:1.5;max-width:580px;margin-left:auto;margin-right:auto;"></p>
     <div class="global-score">
       <div><span id="g-ok">0</span>✅ Tačno</div>
       <div><span id="g-wr">0</span>❌ Netačno</div>
@@ -513,6 +523,14 @@ body {
             <div class="t-res-score" id="t-res-score">—</div>
             <div class="t-res-pct" id="t-res-pct">—</div>
             <div class="t-res-grade" id="t-res-grade">—</div>
+          </div>
+
+          <div id="t-gift-quote" style="display:none">
+            <div class="gift-card">
+              <div class="gi">🎁</div>
+              <div class="gt" id="t-gift-text"></div>
+              <div class="ga" id="t-gift-author"></div>
+            </div>
           </div>
 
           <div class="t-area-breakdown" id="t-res-areas"></div>
@@ -1072,6 +1090,17 @@ function tShowResults() {
   else if (pct >= 45) { grade=2; label='Dovoljan';   emoji='😐'; }
   else                { grade=1; label='Nedovoljan';  emoji='😔'; }
 
+  // Poklon poslovica za ocenu 4 i 5
+  const giftEl = document.getElementById('t-gift-quote');
+  if (grade >= 4) {
+    const gq = randomQuote(headerQ.idx);
+    document.getElementById('t-gift-text').textContent   = `„${gq.q.text}"`;
+    document.getElementById('t-gift-author').textContent = `— ${gq.q.author}`;
+    giftEl.style.display = 'block';
+  } else {
+    giftEl.style.display = 'none';
+  }
+
   document.getElementById('t-res-emoji').textContent = emoji;
   document.getElementById('t-res-score').innerHTML   =
     `${correct}<span style="font-size:0.5em;color:#a0aec0;font-weight:600"> / ${total}</span>`;
@@ -1225,8 +1254,57 @@ function tBackToResults() {
 }
 
 // ============================================================
+// QUOTES
+// ============================================================
+const QUOTES = [
+  { text: "Čovek je kao razlomak, čiji je brojilac ono što on jeste, a imenilac ono što misli o sebi. Što je imenilac veći, razlomak je manji.", author: "Lav Tolstoj" },
+  { text: "Matematika je ključ za celokupno ljudsko znanje.", author: "Lomonosov" },
+  { text: "Brojevi vladaju svetom.", author: "Pitagora" },
+  { text: "U matematici se stvari ne razumeju, na njih se prosto navikne.", author: "Džon fon Nojman" },
+  { text: "Gde god je materija, tu je i geometrija.", author: "Johan Kepler" },
+  { text: "Matematika je kraljica nauka, a aritmetika kraljica matematike.", author: "Karl Fridrih Gaus" },
+  { text: "Bog večito geometrizuje.", author: "Platon" },
+  { text: "Suština matematike nije u tome da jednostavne stvari učini komplikovanim, već da komplikovane učini jednostavnim.", author: "S. Gudstajn" },
+  { text: "Matematika je najviši stepen moći uma.", author: "Semjuel Džonson" },
+  { text: "Priroda je napisana jezikom matematike.", author: "Galileo Galilej" },
+  { text: "U svakoj nauci ima onoliko istine koliko je u njoj matematike.", author: "Imanuel Kant" },
+  { text: "Matematika je umetnost davanja istog imena različitim stvarima.", author: "Anri Poenkare" },
+  { text: "Čista matematika je, na svoj način, poezija logičkih ideja.", author: "Albert Ajnštajn" },
+  { text: "Matematičar je mašina za pretvaranje kafe u teoreme.", author: "Alfréd Rényi" },
+  { text: "Nema kraljevskog puta za geometriju.", author: "Menehmo" },
+  { text: "Uči se rešavanjem problema, a ne čitanjem udžbenika.", author: "E. Kim Neubers" },
+  { text: "Nadahnuće je potrebno u poeziji kao i u geometriji.", author: "Aleksandar Puškin" },
+  { text: "Matematika je nauka mladih. Bavljenje njom predstavlja takvu gimnastiku uma da je za nju potrebna sva gipkost i izdržljivost mladosti.", author: "Norbert Viner" },
+  { text: "Suština matematike leži u njenoj slobodi.", author: "Georg Kantor" },
+  { text: "Bog ne baca kockice, ali se nešto čudno dešava sa prostim brojevima.", author: "Pol Erdoš" },
+  { text: "Lakše je naučiti matematiku nego raditi bez nje.", author: "H. Bouasse" },
+  { text: "Matematika je najviši oblik misli.", author: "Platon" },
+  { text: "Matematika je suviše ozbiljna da se ne bi učinila zanimljivom kad god je to moguće.", author: "Blez Paskal" },
+  { text: "Matematika je kao ljubav: jednostavna ideja, ali može postati veoma komplikovana.", author: "R. Drabek" },
+  { text: "Nijedno ljudsko istraživanje ne može se nazvati pravom naukom ako nije prošlo kroz matematičke dokaze.", author: "Leonardo da Vinči" },
+  { text: "Matematičar je slep čovek u mračnoj sobi koji traži crnu mačku koja nije tamo.", author: "Čarls Darvin" },
+  { text: "Decimalni zarez je izmišljen da bi ljudi mogli da greše sa većom preciznošću.", author: "Anonimni" },
+  { text: "Geometrija je veština dobrog zaključivanja na lošim crtežima.", author: "Adrijen-Mari Ležandr" },
+  { text: "Život je dobar samo za dve stvari: za otkrivanje matematike i za njeno podučavanje.", author: "Simion Poason" },
+  { text: "Nula je jedini broj koji nam omogućava da delimo, a da ništa ne damo.", author: "Anonimni" },
+  { text: "Matematika je jedina istinska metafizika.", author: "Lord Kelvyn" },
+  { text: "Algebra je velikodušna: često daje više nego što se od nje traži.", author: "Žan d'Alamber" },
+  { text: "Pravi matematičar ne može biti srećan ako ne rešava probleme koji su drugima nerešivi.", author: "Anonimni" }
+];
+
+function randomQuote(excludeIdx = -1) {
+  let idx;
+  do { idx = ri(0, QUOTES.length - 1); } while (idx === excludeIdx && QUOTES.length > 1);
+  return { q: QUOTES[idx], idx };
+}
+
+// ============================================================
 // INIT
 // ============================================================
+const headerQ = randomQuote();
+document.getElementById('header-quote').textContent =
+  `„${headerQ.q.text}" — ${headerQ.q.author}`;
+
 rNew();
 jNew();
 nNew();
